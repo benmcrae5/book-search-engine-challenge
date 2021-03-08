@@ -6,7 +6,12 @@ const { signToken } = require('../utils/auth');
 module.exports = {
     Query: {
         //need a way to identify the active user
-        me: () => User.findById().select("-password"),
+        me: (parent, args, context) => {
+            if (!context.user) {
+                throw new AuthenticationError("You are not logged in")
+            }
+            return User.findById(context.user._id).select("-password")
+        },
     },
     Mutation: {
         login: async (parent, { email, password }) => {
